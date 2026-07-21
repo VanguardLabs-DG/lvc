@@ -179,6 +179,115 @@ lib.addKeybind({
 	end
 })
 
+-- Keybind Reativo OX para Giroflex / Luzes de Emergência (Tecla Q)
+lib.addKeybind({
+	name = 'lvc_toggle_lights',
+	description = 'Alternar Luzes de Emergência / Giroflex',
+	defaultKey = 'Q',
+	onPressed = function()
+		if player_is_emerg_driver and veh ~= nil and not key_lock and not IsPauseMenuActive() then
+			local lights_on = IsVehicleSirenOn(veh)
+			if lights_on then
+				AUDIO:Play('Off', AUDIO.off_volume)
+				HUD:SetItemState('switch', false)
+				HUD:SetItemState('siren', false)
+				SetVehicleSiren(veh, false)
+				if trailer ~= nil and trailer ~= 0 then
+					SetVehicleSiren(trailer, false)
+				end
+			else
+				AUDIO:Play('On', AUDIO.on_volume)
+				HUD:SetItemState('switch', true)
+				SetVehicleSiren(veh, true)
+				if trailer ~= nil and trailer ~= 0 then
+					SetVehicleSiren(trailer, true)
+				end
+			end
+			AUDIO:ResetActivityTimer()
+			count_bcast_timer = delay_bcast_timer
+		end
+	end
+})
+
+-- Keybind Reativo OX para Powercall / Aux 1 (Seta Cima)
+lib.addKeybind({
+	name = 'lvc_powercall',
+	description = 'Alternar Sirene Auxiliar (Powercall)',
+	defaultKey = 'UP',
+	onPressed = function()
+		if player_is_emerg_driver and veh ~= nil and not key_lock and not IsMenuOpen() and not IsPauseMenuActive() then
+			local lights_on = IsVehicleSirenOn(veh)
+			if state_pwrcall[veh] == 0 then
+				if lights_on then
+					AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
+					HUD:SetItemState('siren', true)
+					SetPowercallStateForVeh(veh, UTIL:GetToneID('AUX'))
+					count_bcast_timer = delay_bcast_timer
+				end
+			else
+				AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
+				if state_lxsiren[veh] == 0 then
+					HUD:SetItemState('siren', false)
+				end
+				SetPowercallStateForVeh(veh, 0)
+				count_bcast_timer = delay_bcast_timer
+			end
+			AUDIO:ResetActivityTimer()
+		end
+	end
+})
+
+-- Keybind Reativo OX para Buzina Airhorn (Tecla E)
+lib.addKeybind({
+	name = 'lvc_airhorn',
+	description = 'Segurar Buzina Airhorn',
+	defaultKey = 'E',
+	onPressed = function()
+		if player_is_emerg_driver and veh ~= nil and not key_lock and not IsPauseMenuActive() then
+			actv_horn = true
+			AUDIO:ResetActivityTimer()
+			HUD:SetItemState('horn', true)
+			if AUDIO.airhorn_button_SFX then AUDIO:Play('Press', AUDIO.upgrade_volume) end
+		end
+	end,
+	onReleased = function()
+		if actv_horn then
+			actv_horn = false
+			HUD:SetItemState('horn', false)
+			if AUDIO.airhorn_button_SFX then AUDIO:Play('Release', AUDIO.upgrade_volume) end
+		end
+	end
+})
+
+-- Keybind Reativo OX para Sirene Manual / Troca de Tom (Tecla R)
+lib.addKeybind({
+	name = 'lvc_manu_siren',
+	description = 'Sirene Manual / Alternar Tom de Sirene',
+	defaultKey = 'R',
+	onPressed = function()
+		if player_is_emerg_driver and veh ~= nil and not key_lock and not IsPauseMenuActive() then
+			if state_lxsiren[veh] > 0 then
+				AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
+				HUD:SetItemState('horn', false)
+				SetLxSirenStateForVeh(veh, UTIL:GetNextSirenTone(state_lxsiren[veh], veh, true))
+				count_bcast_timer = delay_bcast_timer
+			else
+				AUDIO:ResetActivityTimer()
+				actv_manu = true
+				HUD:SetItemState('siren', true)
+				if AUDIO.manu_button_SFX then AUDIO:Play('Press', AUDIO.upgrade_volume) end
+			end
+		end
+	end,
+	onReleased = function()
+		if actv_manu then
+			actv_manu = false
+			HUD:SetItemState('siren', false)
+			if AUDIO.manu_button_SFX then AUDIO:Play('Release', AUDIO.upgrade_volume) end
+		end
+	end
+})
+
 --On resource start/restart
 CreateThread(function()
 	debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode', 0) == 'true'
@@ -621,18 +730,22 @@ end)
 
 
 ---------------------------------------------------------------------
+---------------------------------------------------------------------
 CreateThread(function()
 	local count_distant_siren_timer = 500
 	local is_radio_disabled = false
 	while true do
-		local sleep = 1000
+		local sleep = 500
 		----- IS IN EMERGENCY VEHICLE -----
 		if player_is_emerg_driver and playerped ~= nil and veh ~= nil then
-			sleep = 0
-
-			-- Disable conflicting GTA default horn/cam controls
-			DisableControlAction(0, 80, true) -- INPUT_VEH_CIN_CAM
-			DisableControlAction(0, 86, true) -- INPUT_VEH_HORN
+			-- Quando buzina ou sirene manual está segurada, reduz para 0ms para resposta ultra-rápida de áudio
+			if actv_horn or actv_manu then
+				sleep = 0
+				DisableControlAction(0, 80, true) -- INPUT_VEH_CIN_CAM
+				DisableControlAction(0, 86, true) -- INPUT_VEH_HORN
+			else
+				sleep = 150
+			end
 
 			-- Throttled distant siren handling
 			if count_distant_siren_timer >= 500 then
@@ -672,104 +785,6 @@ CreateThread(function()
 				if not lights_on and state_pwrcall[veh] > 0 then
 					SetPowercallStateForVeh(veh, 0)
 					count_bcast_timer = delay_bcast_timer
-				end
-
-				----- CONTROLS (INPUT DISPATCH) -----
-				if not IsPauseMenuActive() and UpdateOnscreenKeyboard() ~= 0 and not radio_wheel_active then
-					if not key_lock then
-						------ TOG DFLT SRN LIGHTS ------
-						if IsDisabledControlJustReleased(0, 85) then
-							if lights_on then
-								AUDIO:Play('Off', AUDIO.off_volume)
-								HUD:SetItemState('switch', false)
-								HUD:SetItemState('siren', false)
-								SetVehicleSiren(veh, false)
-								if trailer ~= nil and trailer ~= 0 then
-									SetVehicleSiren(trailer, false)
-								end
-							else
-								AUDIO:Play('On', AUDIO.on_volume)
-								HUD:SetItemState('switch', true)
-								SetVehicleSiren(veh, true)
-								if trailer ~= nil and trailer ~= 0 then
-									SetVehicleSiren(trailer, true)
-								end
-							end
-							AUDIO:ResetActivityTimer()
-							count_bcast_timer = delay_bcast_timer
-						------ POWERCALL ------
-						elseif IsDisabledControlJustReleased(0, 172) and not IsMenuOpen() then
-							if state_pwrcall[veh] == 0 then
-								if lights_on then
-									AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
-									HUD:SetItemState('siren', true)
-									SetPowercallStateForVeh(veh, UTIL:GetToneID('AUX'))
-									count_bcast_timer = delay_bcast_timer
-								end
-							else
-								AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
-								if state_lxsiren[veh] == 0 then
-									HUD:SetItemState('siren', false)
-								end
-								SetPowercallStateForVeh(veh, 0)
-							end
-							AUDIO:ResetActivityTimer()
-							count_bcast_timer = delay_bcast_timer
-						end
-
-						-- CYCLE LX SRN TONES
-						if state_lxsiren[veh] > 0 then
-							if IsDisabledControlJustReleased(0, 80) then
-								AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
-								HUD:SetItemState('horn', false)
-								SetLxSirenStateForVeh(veh, UTIL:GetNextSirenTone(state_lxsiren[veh], veh, true))
-								count_bcast_timer = delay_bcast_timer
-							elseif IsDisabledControlPressed(0, 80) then
-								HUD:SetItemState('horn', true)
-							end
-						end
-
-						-- MANU
-						if state_lxsiren[veh] < 1 then
-							if IsDisabledControlPressed(0, 80) then
-								AUDIO:ResetActivityTimer()
-								actv_manu = true
-								HUD:SetItemState('siren', true)
-							else
-								if actv_manu then
-									HUD:SetItemState('siren', false)
-								end
-								actv_manu = false
-							end
-						else
-							if actv_manu then
-								HUD:SetItemState('siren', false)
-							end
-							actv_manu = false
-						end
-
-						-- HORN
-						if IsDisabledControlPressed(0, 86) then
-							actv_horn = true
-							AUDIO:ResetActivityTimer()
-							HUD:SetItemState('horn', true)
-						else
-							if actv_horn or actv_manu then
-								HUD:SetItemState('horn', false)
-							end
-							actv_horn = false
-						end
-
-						-- SFX
-						if AUDIO.airhorn_button_SFX then
-							if IsDisabledControlJustPressed(0, 86) then AUDIO:Play('Press', AUDIO.upgrade_volume) end
-							if IsDisabledControlJustReleased(0, 86) then AUDIO:Play('Release', AUDIO.upgrade_volume) end
-						end
-						if AUDIO.manu_button_SFX and state_lxsiren[veh] == 0 then
-							if IsDisabledControlJustPressed(0, 80) then AUDIO:Play('Press', AUDIO.upgrade_volume) end
-							if IsDisabledControlJustReleased(0, 80) then AUDIO:Play('Release', AUDIO.upgrade_volume) end
-						end
-					end
 				end
 
 				---- ADJUST HORN / MANU STATE ----

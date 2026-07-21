@@ -46,9 +46,9 @@ end)
 --[[Handles HUD backlight and visibility control.]]
 CreateThread(function()
 	while true do
-		local sleep = 1000
+		local sleep = 2500
 		if player_is_emerg_driver then
-			sleep = 500
+			sleep = 1500
 			-- Backlight control
 			if HUD:GetHudBacklightMode() == 1 and veh ~= nil then
 				local _, veh_lights, veh_headlights  = GetVehicleLightsState(veh)

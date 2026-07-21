@@ -46,12 +46,12 @@ AUDIO.activity_reminder_volume 	= default_reminder_volume
 ------ACTIVITY REMINDER FUNCTIONALITY------
 CreateThread(function()
 	while true do
-		local sleep = 2000
+		local sleep = 4000
 		if activity_reminder_index > 1 and player_is_emerg_driver and veh ~= nil then
 			if IsVehicleSirenOn(veh) and state_lxsiren[veh] == 0 and state_pwrcall[veh] == 0 then
-				sleep = 1000
+				sleep = 2500
 				if activity_timer > 1 then
-					activity_timer = activity_timer - 1000
+					activity_timer = activity_timer - 2500
 				else
 					AUDIO:Play('Reminder', AUDIO.activity_reminder_volume)
 					AUDIO:ResetActivityTimer()
