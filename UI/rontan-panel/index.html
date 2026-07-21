@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Giroflex Rontan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: transparent;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .panel-wrap {
+            padding: 10px;
+            width: 100%;
+            max-width: 520px;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            transform-origin: bottom right;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.9));
+        }
+
+        .btn-shape {
+            cursor: pointer;
+            transition: all 0.15s ease;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5));
+        }
+
+        .btn-shape:hover {
+            filter: brightness(1.15) drop-shadow(0 5px 6px rgba(0, 0, 0, 0.6));
+        }
+
+        .btn-shape:active {
+            filter: brightness(0.9) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.9));
+            transform: translateY(1px);
+        }
+
+        .btn-text {
+            font-size: 11px;
+            font-weight: 700;
+            fill: #0a1f0a;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .btn-text-red {
+            fill: #1f0a0a;
+        }
+
+        .text-lit {
+            filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+        }
+
+        .led {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="panel-wrap">
+        <svg viewBox="0 0 620 340" width="100%" height="100%" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
+            <defs>
+                <clipPath id="body-clip">
+                    <rect x="6" y="6" width="608" height="324" rx="25" />
+                </clipPath>
+
+                <linearGradient id="carc" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#32363a" />
+                    <stop offset="40%" stop-color="#1e2023" />
+                    <stop offset="100%" stop-color="#151719" />
+                </linearGradient>
+
+                <linearGradient id="gOff" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#3d6b3d" />
+                    <stop offset="100%" stop-color="#1b381b" />
+                </linearGradient>
+                <linearGradient id="gOn" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#8cff8c" />
+                    <stop offset="50%" stop-color="#39e639" />
+                    <stop offset="100%" stop-color="#15b315" />
+                </linearGradient>
+
+                <linearGradient id="rOff" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#6b3030" />
+                    <stop offset="100%" stop-color="#381515" />
+                </linearGradient>
+                <linearGradient id="rOn" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#ff8c8c" />
+                    <stop offset="50%" stop-color="#e63939" />
+                    <stop offset="100%" stop-color="#b31515" />
+                </linearGradient>
+
+                <linearGradient id="bOffBtn" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#444444" />
+                    <stop offset="100%" stop-color="#1a1a1a" />
+                </linearGradient>
+
+                <filter id="glowA" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="3.5" result="b" />
+                    <feMerge>
+                        <feMergeNode in="b" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+                <filter id="glowR" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="3.5" result="b" />
+                    <feMerge>
+                        <feMergeNode in="b" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+
+                <filter id="absTexture">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" result="noise" />
+                    <feDiffuseLighting in="noise" lighting-color="#ffffff" surfaceScale="1.8" diffuseConstant="1.4"
+                        result="light">
+                        <feDistantLight azimuth="45" elevation="40" />
+                    </feDiffuseLighting>
+                    <feColorMatrix type="matrix" in="light" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.5 0" />
+                </filter>
+
+                <radialGradient id="ledOff" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#333333" />
+                    <stop offset="100%" stop-color="#0a0a0a" />
+                </radialGradient>
+                <radialGradient id="ledOnA" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="25%" stop-color="#ffdd55" />
+                    <stop offset="70%" stop-color="#ff8800" />
+                    <stop offset="100%" stop-color="#883300" />
+                </radialGradient>
+                <radialGradient id="ledOnR" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="25%" stop-color="#ff5555" />
+                    <stop offset="70%" stop-color="#cc0000" />
+                    <stop offset="100%" stop-color="#550000" />
+                </radialGradient>
+            </defs>
+
+            <!-- CARCAÇA BASE SÓLIDA (0,0,620,340) - 100% OPAQUE -->
+            <rect x="0" y="0" width="620" height="340" rx="20" fill="url(#carc)" />
+            <rect x="1" y="1" width="618" height="338" rx="19" fill="none" stroke="#0a0b0d" stroke-width="2" />
+
+            <!-- CABEÇALHO RONTAN INTEGRADO AO TOPO DA CARCAÇA -->
+            <g class="badge-3d">
+                <path d="M 0 20 Q 0 0 20 0 L 600 0 Q 620 0 620 20 L 620 38 L 0 38 Z" fill="#131517" />
+                <line x1="0" y1="38" x2="620" y2="38" stroke="#000000" stroke-width="2" />
+                <line x1="0" y1="39" x2="620" y2="39" stroke="#3a414a" stroke-width="1" opacity="0.4" />
+                <text x="310" y="24" text-anchor="middle" fill="#9aa4af" font-size="12px" font-weight="900" letter-spacing="7px">RONTAN</text>
+            </g>
+
+            <!-- Canaleta Horizontal Principal -->
+            <g class="groove-h">
+                <path d="M 76 83.5 Q 310 99.5 544 83.5" stroke="#92a8bd" stroke-width="1.5" opacity="0.25"
+                    fill="none" />
+                <path d="M 76 82 Q 310 98 544 82" stroke="#000000" stroke-width="3" fill="none" opacity="0.95" />
+            </g>
+
+            <!-- Canaleta Horizontal Inferior -->
+            <g class="groove-h">
+                <path d="M 76 281.5 Q 310 293.5 544 281.5" stroke="#92a8bd" stroke-width="1.5" opacity="0.25"
+                    fill="none" />
+                <path d="M 76 280 Q 310 292 544 280" stroke="#000000" stroke-width="3" fill="none" opacity="0.95" />
+            </g>
+
+            <!-- Canaletas Verticais -->
+            <g class="groove-v">
+                <path d="M 77.5 36 L 77.5 280" stroke="#92a8bd" stroke-width="1.5" opacity="0.15" />
+                <path d="M 75 36 L 75 280" stroke="#000000" stroke-width="3" opacity="0.95" />
+            </g>
+            <g class="groove-v">
+                <path d="M 163.5 88 L 163.5 280" stroke="#92a8bd" stroke-width="1" opacity="0.15" />
+                <path d="M 161.5 88 L 161.5 280" stroke="#000000" stroke-width="2" opacity="0.85" />
+            </g>
+            <g class="groove-v">
+                <path d="M 459.5 88 L 459.5 280" stroke="#92a8bd" stroke-width="1" opacity="0.15" />
+                <path d="M 457.5 88 L 457.5 280" stroke="#000000" stroke-width="2" opacity="0.85" />
+            </g>
+            <g class="groove-v">
+                <path d="M 545.5 36 L 545.5 280" stroke="#92a8bd" stroke-width="1.5" opacity="0.15" />
+                <path d="M 543 36 L 543 280" stroke="#000000" stroke-width="3" opacity="0.95" />
+            </g>
+
+            <!-- ESCUDO CENTRAL ELEVADO -->
+            <g class="shield-3d">
+                <path d="M 165 95 Q 310 111 455 95 L 455 271 Q 310 287 165 271 Z" fill="none" stroke="#92a8bd"
+                    stroke-width="2.5" opacity="0.18" />
+                <path d="M 166 96 Q 310 112 454 96 L 454 270 Q 310 286 166 270 Z" fill="none" stroke="#000000"
+                    stroke-width="4.5" opacity="0.9" />
+                <path d="M 169 99 Q 310 115 451 99 L 451 267 Q 310 283 169 267 Z" fill="url(#carc)" opacity="0.8" />
+                <path d="M 169 99 Q 310 115 451 99 L 451 267 Q 310 283 169 267 Z" fill="none" stroke="#000000"
+                    stroke-width="2.5" opacity="0.9" />
+            </g>
+
+            <!-- EXTREMA ESQUERDA -->
+            <g class="btn-group" data-btn="btn1" data-color="r">
+                <rect class="btn-shape" x="13" y="60" width="55" height="52" rx="6" fill="url(#rOff)" stroke="#0f0505"
+                    stroke-width="2" />
+                <text class="btn-text btn-text-red" x="40.5" y="86" font-size="20px">1</text>
+            </g>
+            <g class="btn-group" data-btn="btn2" data-color="g">
+                <rect class="btn-shape" x="13" y="130" width="55" height="52" rx="6" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="40.5" y="156" font-size="20px">2</text>
+            </g>
+            <g class="btn-group" data-btn="light" data-color="g">
+                <rect class="btn-shape" x="13" y="200" width="55" height="52" rx="6" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <g transform="translate(40.5, 226) scale(1.1)">
+                    <circle cx="0" cy="-6" r="6.5" fill="none" stroke="#0a1f0a" stroke-width="1.8" />
+                    <path d="M -3.5 0 L 3.5 0 L 2 4 L -2 4 Z" fill="#0a1f0a" />
+                    <line x1="-1.5" y1="4" x2="-1.5" y2="7" stroke="#0a1f0a" stroke-width="1.5" />
+                    <line x1="1.5" y1="4" x2="1.5" y2="7" stroke="#0a1f0a" stroke-width="1.5" />
+                    <line x1="-8" y1="-10" x2="-5" y2="-7" stroke="#0a1f0a" stroke-width="1.2" />
+                    <line x1="8" y1="-10" x2="5" y2="-7" stroke="#0a1f0a" stroke-width="1.2" />
+                    <line x1="0" y1="-16" x2="0" y2="-13" stroke="#0a1f0a" stroke-width="1.2" />
+                </g>
+            </g>
+
+            <!-- EXTREMA DIREITA -->
+            <g class="btn-group" data-btn="barsup" data-color="g">
+                <path class="btn-shape" d="M 552 62 L 607 68 L 607 112 L 552 106 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <rect x="563" y="99" width="4" height="4" fill="#0a1f0a" class="btn-icon" />
+                <rect x="570" y="94" width="4" height="9" fill="#0a1f0a" class="btn-icon" />
+                <rect x="577" y="89" width="4" height="14" fill="#0a1f0a" class="btn-icon" />
+                <rect x="584" y="84" width="4" height="19" fill="#0a1f0a" class="btn-icon" />
+                <path d="M 594 93 L 600 93 M 597 90 L 597 96" stroke="#0a1f0a" stroke-width="2" class="btn-icon" />
+            </g>
+            <g class="btn-group" data-btn="barsdown" data-color="g">
+                <path class="btn-shape" d="M 552 132 L 607 138 L 607 182 L 552 176 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <rect x="563" y="146" width="4" height="19" fill="#0a1f0a" class="btn-icon" />
+                <rect x="570" y="151" width="4" height="14" fill="#0a1f0a" class="btn-icon" />
+                <rect x="577" y="156" width="4" height="9" fill="#0a1f0a" class="btn-icon" />
+                <rect x="584" y="161" width="4" height="4" fill="#0a1f0a" class="btn-icon" />
+                <path d="M 594 165 L 600 165" stroke="#0a1f0a" stroke-width="2" class="btn-icon" />
+            </g>
+            <g class="btn-group" data-btn="cruise" data-color="g">
+                <path class="btn-shape" d="M 552 202 L 607 208 L 607 252 L 552 246 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="579.5" y="227">CRUISE</text>
+            </g>
+
+            <!-- FILEIRA SUPERIOR ARQUEADA -->
+            <g class="btn-group" data-btn="pursuit" data-color="g">
+                <path class="btn-shape" d="M 82 43 L 162 48 L 158 76 L 90 76 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="126" y="62">PURSUIT</text>
+            </g>
+            <g class="btn-group" data-btn="aux1" data-color="g">
+                <path class="btn-shape" d="M 176 49 L 256 51 L 254 76 L 180 76 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="216" y="63">AUX 1</text>
+            </g>
+            <g class="btn-group" data-btn="aux2" data-color="g">
+                <path class="btn-shape" d="M 270 51 Q 310 52 350 51 L 348 76 Q 310 77 272 76 Z" fill="url(#gOff)"
+                    stroke="#050f05" stroke-width="2" />
+                <text class="btn-text" x="310" y="64">AUX 2</text>
+            </g>
+            <g class="btn-group" data-btn="aux3" data-color="g">
+                <path class="btn-shape" d="M 364 51 L 444 49 L 440 76 L 366 76 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="404" y="63">AUX 3</text>
+            </g>
+            <g class="btn-group" data-btn="emerg" data-color="g">
+                <path class="btn-shape" d="M 458 48 L 538 43 L 530 76 L 462 76 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="494" y="62">EMERG</text>
+            </g>
+
+            <!-- COLUNA INTERNA ESQUERDA -->
+            <g class="btn-group" data-btn="wail" data-color="g">
+                <path class="btn-shape" d="M 82 92 L 154 94 L 154 137 L 82 135 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="118" y="114">WAIL</text>
+            </g>
+            <g class="btn-group" data-btn="yelp" data-color="g">
+                <path class="btn-shape" d="M 82 152 L 154 154 L 154 197 L 82 195 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="118" y="174">YELP</text>
+            </g>
+            <g class="btn-group" data-btn="man" data-color="g">
+                <path class="btn-shape" d="M 82 212 L 154 214 L 154 257 L 82 255 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="118" y="234">MAN</text>
+            </g>
+
+            <!-- COLUNA INTERNA DIREITA -->
+            <g class="btn-group" data-btn="hilo" data-color="g">
+                <path class="btn-shape" d="M 466 94 L 538 92 L 538 135 L 466 137 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="502" y="114">HI/LO</text>
+            </g>
+            <g class="btn-group" data-btn="pierce" data-color="g">
+                <path class="btn-shape" d="M 466 154 L 538 152 L 538 195 L 466 197 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="502" y="174">PIERCE</text>
+            </g>
+            <g class="btn-group" data-btn="horn" data-color="g">
+                <path class="btn-shape" d="M 466 214 L 538 212 L 538 255 L 466 257 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="502" y="234">HORN</text>
+            </g>
+
+            <!-- LEDS SUPERIORES ÂMBAR (9) -->
+            <g id="leds-top">
+                <circle class="led" cx="206" cy="116" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="232" cy="116" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="258" cy="116" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="284" cy="116" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="310" cy="116" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="336" cy="116" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="362" cy="116" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="388" cy="116" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="414" cy="116" r="3.5" fill="url(#ledOff)" />
+            </g>
+
+            <!-- MÓDULO CENTRAL INTERMEDIÁRIO -->
+            <g class="btn-group" data-btn="cutfront" data-color="g">
+                <path class="btn-shape" d="M 178 144 L 254 144 L 250 184 L 186 184 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="216" y="158">CUT</text>
+                <text class="btn-text" x="216" y="170">FRONT</text>
+            </g>
+            <g class="btn-group" data-btn="neutro" data-color="g">
+                <rect class="btn-shape" x="270" y="144" width="80" height="40" rx="5" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+            </g>
+            <g class="btn-group" data-btn="cutrear" data-color="g">
+                <path class="btn-shape" d="M 366 144 L 442 144 L 434 184 L 370 184 Z" fill="url(#gOff)" stroke="#050f05"
+                    stroke-width="2" />
+                <text class="btn-text" x="404" y="158">CUT</text>
+                <text class="btn-text" x="404" y="170">REAR</text>
+            </g>
+
+            <!-- OFF -->
+            <g class="btn-group" data-btn="off">
+                <path class="btn-shape" d="M 270 208 L 350 208 L 340 238 L 280 238 Z" fill="url(#bOffBtn)" stroke="#111"
+                    stroke-width="2" />
+                <text class="btn-text" x="310" y="223" fill="#666" font-size="12px">OFF</text>
+            </g>
+
+            <!-- LEDS INFERIORES VERMELHOS (4) -->
+            <g id="leds-bot">
+                <circle class="led" cx="265" cy="250" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="295" cy="250" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="325" cy="250" r="3.5" fill="url(#ledOff)" />
+                <circle class="led" cx="355" cy="250" r="3.5" fill="url(#ledOff)" />
+            </g>
+
+            <!-- CHAVE GERAL (Master Switch) -->
+            <g id="master-switch" style="cursor: pointer;">
+                <rect x="270" y="302" width="80" height="16" rx="4" fill="#0a0a0a" stroke="#222" stroke-width="1" />
+                <rect x="272" y="304" width="76" height="12" rx="3" fill="#000" stroke="#111" stroke-width="1" />
+
+                <text x="285" y="310" fill="#333" font-size="7px" font-weight="bold" font-family="sans-serif"
+                    text-anchor="middle" dominant-baseline="middle" pointer-events="none">OFF</text>
+                <text x="335" y="310" fill="#333" font-size="7px" font-weight="bold" font-family="sans-serif"
+                    text-anchor="middle" dominant-baseline="middle" pointer-events="none">ON</text>
+
+                <g id="switch-slider" style="transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);">
+                    <rect x="272" y="304" width="40" height="12" rx="3" fill="url(#bOffBtn)" stroke="#222"
+                        stroke-width="1" />
+                    <line x1="288" y1="306" x2="288" y2="314" stroke="#111" stroke-width="1.5" />
+                    <line x1="292" y1="306" x2="292" y2="314" stroke="#111" stroke-width="1.5" />
+                    <line x1="296" y1="306" x2="296" y2="314" stroke="#111" stroke-width="1.5" />
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        (function() {
+            let isPowerOn = false;
+            let audioPlayer = null;
+            let soundID = 0;
+            let scale = 0.6;
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            const panelWrap = document.querySelector('.panel-wrap');
+            const masterSwitch = document.getElementById('master-switch');
+            const switchSlider = document.getElementById('switch-slider');
+
+            const backup = {
+                left: panelWrap ? panelWrap.style.left : '',
+                top: panelWrap ? panelWrap.style.top : ''
+            };
+
+            function sendData(name, data) {
+                fetch(`https://lvc/${name}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+                    body: JSON.stringify(data !== undefined ? (typeof data === 'object' ? data : { scale: data }) : {})
+                }).catch(() => {});
+            }
+
+            function playSound(file, volume) {
+                if (audioPlayer != null) {
+                    audioPlayer.pause();
+                }
+                soundID++;
+                audioPlayer = new Audio("../sounds/" + file + ".ogg");
+                audioPlayer.volume = volume !== undefined ? volume : 0.5;
+                const promise = audioPlayer.play();
+                if (promise !== undefined) {
+                    promise.catch(() => { audioPlayer = null; });
+                }
+            }
+
+            function setButtonState(btnName, state) {
+                const group = document.querySelector(`.btn-group[data-btn="${btnName}"]`);
+                if (!group) return;
+                const shape = group.querySelector('.btn-shape');
+                if (!shape) return;
+
+                let color = group.dataset.color || (btnName === 'btn1' ? 'r' : 'g');
+                const onGrad = color === 'r' ? 'url(#rOn)' : 'url(#gOn)';
+                const offGrad = color === 'r' ? 'url(#rOff)' : 'url(#gOff)';
+
+                shape.setAttribute('fill', state ? onGrad : offGrad);
+
+                const dark = color === 'r' ? '#1f0a0a' : '#0a1f0a';
+                const darker = color === 'r' ? '#330505' : '#052a05';
+
+                const childElements = group.querySelectorAll('.btn-text, circle:not(.led), path:not(.btn-shape), line, rect:not(.btn-shape)');
+                childElements.forEach(el => {
+                    if (state) {
+                        el.classList.add('text-lit');
+                    } else {
+                        el.classList.remove('text-lit');
+                    }
+                    if (el.tagName === 'text') el.setAttribute('fill', state ? dark : darker);
+                    if (el.tagName === 'path' || el.tagName === 'line') {
+                        if (el.hasAttribute('stroke')) el.setAttribute('stroke', state ? dark : darker);
+                        if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none') el.setAttribute('fill', state ? dark : darker);
+                    }
+                    if (el.tagName === 'circle') el.setAttribute('stroke', dark);
+                    if (el.tagName === 'rect') el.setAttribute('fill', dark);
+                });
+                updateLeds();
+            }
+
+            function setMasterPower(state) {
+                isPowerOn = state;
+                if (switchSlider) switchSlider.style.transform = isPowerOn ? 'translate(36px, 0)' : 'translate(0px, 0)';
+                if (!isPowerOn) {
+                    allOff();
+                }
+                updateLeds();
+            }
+
+            function allOff() {
+                document.querySelectorAll('.btn-shape').forEach(s => {
+                    const g = s.parentElement;
+                    if (!g || g.dataset.btn === 'off') return;
+                    const isRed = (g.dataset.btn === 'btn1' || g.dataset.color === 'r');
+                    s.setAttribute('fill', isRed ? 'url(#rOff)' : 'url(#gOff)');
+                });
+
+                document.querySelectorAll('.btn-group').forEach(g => {
+                    if (g.dataset.btn === 'off') return;
+                    const isRed = (g.dataset.btn === 'btn1' || g.dataset.color === 'r');
+                    const dark = isRed ? '#1f0a0a' : '#0a1f0a';
+
+                    const childElements = g.querySelectorAll('.btn-text, circle:not(.led), path:not(.btn-shape), line, rect:not(.btn-shape)');
+                    childElements.forEach(el => {
+                        el.classList.remove('text-lit');
+                        if (el.tagName === 'text') el.setAttribute('fill', dark);
+                        if (el.tagName === 'path' || el.tagName === 'line') {
+                            if (el.hasAttribute('stroke')) el.setAttribute('stroke', dark);
+                            if (el.hasAttribute('fill') && el.getAttribute('fill') !== 'none') el.setAttribute('fill', dark);
+                        }
+                        if (el.tagName === 'circle') el.setAttribute('stroke', dark);
+                        if (el.tagName === 'rect') el.setAttribute('fill', dark);
+                    });
+                });
+
+                updateLeds();
+            }
+
+            function updateLeds(taPattern) {
+                const onCount = [...document.querySelectorAll('.btn-shape')].filter(s => {
+                    const f = s.getAttribute('fill');
+                    return f === 'url(#gOn)' || f === 'url(#rOn)';
+                }).length;
+
+                document.querySelectorAll('#leds-top .led').forEach((led, i) => {
+                    let lit = false;
+                    if (taPattern !== undefined && taPattern > 0) {
+                        if (taPattern === 1) lit = i < 3;
+                        else if (taPattern === 2) lit = i >= 6;
+                        else if (taPattern === 3) lit = (i >= 3 && i <= 5);
+                    } else {
+                        lit = isPowerOn && (onCount > 0 && i < Math.min(onCount + 2, 9));
+                    }
+                    led.setAttribute('fill', lit ? 'url(#ledOnA)' : 'url(#ledOff)');
+                    led.setAttribute('filter', lit ? 'url(#glowA)' : '');
+                });
+
+                document.querySelectorAll('#leds-bot .led').forEach((led, i) => {
+                    const lit = isPowerOn && (onCount > 0);
+                    led.setAttribute('fill', lit ? 'url(#ledOnR)' : 'url(#ledOff)');
+                    led.setAttribute('filter', lit ? 'url(#glowR)' : '');
+                });
+            }
+
+            if (masterSwitch) {
+                masterSwitch.addEventListener('click', () => {
+                    setMasterPower(!isPowerOn);
+                    sendData('hud:toggleMaster', { state: isPowerOn });
+                });
+            }
+
+            document.querySelectorAll('.btn-group').forEach(btn => {
+                const btnName = btn.dataset.btn;
+
+                btn.addEventListener('click', function () {
+                    if (btnName === 'off') {
+                        allOff();
+                        sendData('hud:clickButton', { button: 'off' });
+                        return;
+                    }
+                    sendData('hud:clickButton', { button: btnName });
+                });
+
+                if (btnName === 'man' || btnName === 'horn') {
+                    btn.addEventListener('mousedown', function () {
+                        sendData('hud:pressButton', { button: btnName });
+                    });
+                    btn.addEventListener('mouseup', function () {
+                        sendData('hud:releaseButton', { button: btnName });
+                    });
+                }
+            });
+
+            window.addEventListener('message', function (event) {
+                const data = event.data;
+                if (!data) return;
+                const type = data._type;
+
+                if (type === 'audio') {
+                    playSound(data.file, data.volume);
+                } else if (type === 'hud:setItemState') {
+                    const item = data.item;
+                    const state = data.state;
+
+                    if (item === 'hud') {
+                        if (panelWrap) panelWrap.style.display = state ? 'block' : 'none';
+                    } else if (item === 'switch') {
+                        setMasterPower(state === true || state === 1);
+                    } else if (item === 'siren') {
+                        if (state === false || state === 0) {
+                            setButtonState('wail', false);
+                            setButtonState('yelp', false);
+                            setButtonState('hilo', false);
+                            setButtonState('pierce', false);
+                        } else if (state === true) {
+                            setButtonState('wail', true);
+                            setButtonState('yelp', false);
+                            setButtonState('hilo', false);
+                            setButtonState('pierce', false);
+                        } else if (typeof state === 'number') {
+                            setButtonState('wail', state === 2);
+                            setButtonState('yelp', state === 3);
+                            setButtonState('hilo', state === 4);
+                            setButtonState('pierce', state >= 5);
+                        }
+                    } else if (item === 'horn') {
+                        setButtonState('horn', state);
+                    } else if (item === 'man') {
+                        setButtonState('man', state);
+                    } else if (item === 'tkd') {
+                        setButtonState('aux3', state);
+                    } else if (item === 'lock') {
+                        setButtonState('cruise', state);
+                    } else if (item === 'ta') {
+                        updateLeds(state);
+                    } else if (item === 'aux1') {
+                        setButtonState('aux1', state);
+                    } else if (item === 'aux2') {
+                        setButtonState('aux2', state);
+                    } else if (item === 'aux3') {
+                        setButtonState('aux3', state);
+                    } else if (item === 'pursuit') {
+                        setButtonState('pursuit', state);
+                    } else if (item === 'emerg') {
+                        setButtonState('emerg', state);
+                    } else if (item === 'cutfront') {
+                        setButtonState('cutfront', state);
+                    } else if (item === 'cutrear') {
+                        setButtonState('cutrear', state);
+                    } else if (item === 'cruise') {
+                        setButtonState('cruise', state);
+                    }
+                } else if (type === 'hud:setHudScale') {
+                    scale = data.scale;
+                    if (panelWrap) panelWrap.style.transform = `scale(${scale})`;
+                } else if (type === 'hud:getHudScale') {
+                    sendData('hud:sendHudScale', scale);
+                } else if (type === 'hud:setHudPosition') {
+                    if (data.pos && panelWrap) {
+                        panelWrap.style.left = data.pos.left;
+                        panelWrap.style.top = data.pos.top;
+                    }
+                } else if (type === 'hud:resetPosition') {
+                    if (panelWrap) {
+                        panelWrap.style.left = backup.left;
+                        panelWrap.style.top = backup.top;
+                    }
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                if (e.keyCode === 27 || e.keyCode === 9 || e.keyCode === 32) {
+                    if (panelWrap) sendData('hud:setHudPositon', { left: panelWrap.style.left, top: panelWrap.style.top });
+                    sendData('hud:setMoveState', false);
+                }
+            });
+
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                if (panelWrap) sendData('hud:setHudPositon', { left: panelWrap.style.left, top: panelWrap.style.top });
+                sendData('hud:setMoveState', false);
+            });
+
+            if (panelWrap) {
+                panelWrap.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                if (panelWrap) {
+                    panelWrap.style.top = (panelWrap.offsetTop - pos2) + "px";
+                    panelWrap.style.left = (panelWrap.offsetLeft - pos1) + "px";
+                }
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        })();
+    </script>
+</body>
+
+</html>
