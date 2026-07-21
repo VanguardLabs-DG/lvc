@@ -25,12 +25,8 @@ dependencies {
 
 files({
     'UI/html/index.html',
-    'UI/html/lvc.js',
-    'UI/html/style.css',
 	'UI/sounds/*.ogg',
 	'UI/sounds/**/*.ogg',
-	'UI/textures/**/*.png',
-	'UI/textures/**/*.gif',
 })
 
 
